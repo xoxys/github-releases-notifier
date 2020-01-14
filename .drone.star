@@ -203,7 +203,7 @@ def notification():
       },
       {
         'name': 'microbadger',
-        'image': 'xoxys/github-releases-notifier',
+        'image': 'plugins/manifest',
         'settings': {
           'urls': {
             'from_secret': 'microbadger_url'

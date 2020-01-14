@@ -287,7 +287,7 @@ steps:
     - success
 
 - name: microbadger
-  image: xoxys/github-releases-notifier
+  image: plugins/manifest
   settings:
     urls:
       from_secret: microbadger_url
@@ -310,6 +310,6 @@ depends_on:
 
 ---
 kind: signature
-hmac: f15877ab66dddf208fe6c8df97b8c6cbec01b48f4b78061fe33421c3884356df
+hmac: 3c5a540d6771dd1daf780df4a1f3cc5b73e77be37ed9334762e8582507a6e385
 
 ...
