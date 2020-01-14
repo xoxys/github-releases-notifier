@@ -202,6 +202,22 @@ def notification():
         },
       },
       {
+        'name': 'readme',
+        'image': 'sheogorath/readme-to-dockerhub',
+        'environment': {
+          'DOCKERHUB_USERNAME': {
+            'from_secret': 'docker_username'
+          },
+          'DOCKERHUB_PASSWORD': {
+            'from_secret': 'docker_password'
+          },
+          'DOCKERHUB_REPO_PREFIX': 'xoxys',
+          'DOCKERHUB_REPO_NAME': 'github-releases-notifier',
+          'README_PATH': 'README.md',
+          'SHORT_DESCRIPTION': 'Receive Slack notifications for new GitHub releases'
+        },
+      },
+      {
         'name': 'microbadger',
         'image': 'plugins/webhook',
         'settings': {
@@ -213,6 +229,25 @@ def notification():
           'status': [
             'success',
           ]
+        },
+      },
+      {
+        'name': 'matrix',
+        'image': 'plugins/matrix',
+        'settings': {
+          'homeserver': {
+            'from_secret': 'matrix_homeserver',
+          },
+          'password': {
+            'from_secret': 'matrix_password',
+          },
+          'roomid': {
+            'from_secret': 'matrix_roomid',
+          },
+          'template': 'Status: **{{ build.status }}**<br/> Build: [{{ repo.Owner }}/{{ repo.Name }}]({{ build.link }}) ({{ build.branch }}) by {{ build.author }}<br/> Message: {{ build.message }}',
+          'username': {
+            'from_secret': 'matrix_username',
+          },
         },
       },
     ],

@@ -286,6 +286,18 @@ steps:
     status:
     - success
 
+- name: readme
+  image: sheogorath/readme-to-dockerhub
+  environment:
+    DOCKERHUB_PASSWORD:
+      from_secret: docker_password
+    DOCKERHUB_REPO_NAME: github-releases-notifier
+    DOCKERHUB_REPO_PREFIX: xoxys
+    DOCKERHUB_USERNAME:
+      from_secret: docker_username
+    README_PATH: README.md
+    SHORT_DESCRIPTION: Receive Slack notifications for new GitHub releases
+
 - name: microbadger
   image: plugins/webhook
   settings:
@@ -294,6 +306,19 @@ steps:
   when:
     status:
     - success
+
+- name: matrix
+  image: plugins/matrix
+  settings:
+    homeserver:
+      from_secret: matrix_homeserver
+    password:
+      from_secret: matrix_password
+    roomid:
+      from_secret: matrix_roomid
+    template: "Status: **{{ build.status }}**<br/> Build: [{{ repo.Owner }}/{{ repo.Name }}]({{ build.link }}) ({{ build.branch }}) by {{ build.author }}<br/> Message: {{ build.message }}"
+    username:
+      from_secret: matrix_username
 
 trigger:
   ref:
@@ -310,6 +335,6 @@ depends_on:
 
 ---
 kind: signature
-hmac: 0de8af9792e89d979830af171dfe80d182026c65bd31261e8d142f112078b51b
+hmac: 48723ecce577b6addd70c457f07360a1986bbb43b56034619bf9843efc797a4a
 
 ...
