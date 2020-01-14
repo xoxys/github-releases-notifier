@@ -37,7 +37,7 @@ trigger:
 ---
 kind: pipeline
 type: docker
-name: linux-amd64
+name: build-container-amd64
 
 platform:
   os: linux
@@ -47,7 +47,7 @@ steps:
 - name: build-push
   image: golang:1.12
   commands:
-  - go build -v -ldflags "-X main.version=${DRONE_COMMIT_SHA:0:8}" -a -tags netgo -o release/linux/amd64/github-releases-notifier
+  - go build -v -ldflags "-X main.version=${DRONE_COMMIT_SHA:0:8}" -a -tags netgo -o release/amd64/github-releases-notifier
   environment:
     CGO_ENABLED: 0
   when:
@@ -58,7 +58,7 @@ steps:
 - name: build-tag
   image: golang:1.12
   commands:
-  - go build -v -ldflags "-X main.version=${DRONE_TAG##v}" -a -tags netgo -o release/linux/amd64/github-releases-notifier
+  - go build -v -ldflags "-X main.version=${DRONE_TAG##v}" -a -tags netgo -o release/amd64/github-releases-notifier
   environment:
     CGO_ENABLED: 0
   when:
@@ -68,17 +68,17 @@ steps:
 - name: executable
   image: golang:1.12
   commands:
-  - ./release/linux/amd64/github-releases-notifier --help
+  - ./release/amd64/github-releases-notifier --help
 
 - name: dryrun
   image: plugins/docker
   settings:
-    dockerfile: docker/Dockerfile.linux.amd64
+    dockerfile: docker/Dockerfile.amd64
     dry_run: true
     password:
       from_secret: docker_password
     repo: xoxys/github-releases-notifier
-    tags: linux-amd64
+    tags: amd64
     username:
       from_secret: docker_username
   when:
@@ -89,8 +89,8 @@ steps:
   image: plugins/docker
   settings:
     auto_tag: true
-    auto_tag_suffix: linux-amd64
-    dockerfile: docker/Dockerfile.linux.amd64
+    auto_tag_suffix: amd64
+    dockerfile: docker/Dockerfile.amd64
     password:
       from_secret: docker_password
     repo: xoxys/github-releases-notifier
@@ -113,7 +113,7 @@ depends_on:
 ---
 kind: pipeline
 type: docker
-name: linux-arm64
+name: build-container-arm64
 
 platform:
   os: linux
@@ -123,7 +123,7 @@ steps:
 - name: build-push
   image: golang:1.12
   commands:
-  - go build -v -ldflags "-X main.version=${DRONE_COMMIT_SHA:0:8}" -a -tags netgo -o release/linux/arm64/github-releases-notifier
+  - go build -v -ldflags "-X main.version=${DRONE_COMMIT_SHA:0:8}" -a -tags netgo -o release/arm64/github-releases-notifier
   environment:
     CGO_ENABLED: 0
   when:
@@ -134,7 +134,7 @@ steps:
 - name: build-tag
   image: golang:1.12
   commands:
-  - go build -v -ldflags "-X main.version=${DRONE_TAG##v}" -a -tags netgo -o release/linux/arm64/github-releases-notifier
+  - go build -v -ldflags "-X main.version=${DRONE_TAG##v}" -a -tags netgo -o release/arm64/github-releases-notifier
   environment:
     CGO_ENABLED: 0
   when:
@@ -144,17 +144,17 @@ steps:
 - name: executable
   image: golang:1.12
   commands:
-  - ./release/linux/arm64/github-releases-notifier --help
+  - ./release/arm64/github-releases-notifier --help
 
 - name: dryrun
   image: plugins/docker
   settings:
-    dockerfile: docker/Dockerfile.linux.arm64
+    dockerfile: docker/Dockerfile.arm64
     dry_run: true
     password:
       from_secret: docker_password
     repo: xoxys/github-releases-notifier
-    tags: linux-arm64
+    tags: arm64
     username:
       from_secret: docker_username
   when:
@@ -165,8 +165,8 @@ steps:
   image: plugins/docker
   settings:
     auto_tag: true
-    auto_tag_suffix: linux-arm64
-    dockerfile: docker/Dockerfile.linux.arm64
+    auto_tag_suffix: arm64
+    dockerfile: docker/Dockerfile.arm64
     password:
       from_secret: docker_password
     repo: xoxys/github-releases-notifier
@@ -189,7 +189,7 @@ depends_on:
 ---
 kind: pipeline
 type: docker
-name: linux-arm
+name: build-container-arm
 
 platform:
   os: linux
@@ -199,7 +199,7 @@ steps:
 - name: build-push
   image: golang:1.12
   commands:
-  - go build -v -ldflags "-X main.version=${DRONE_COMMIT_SHA:0:8}" -a -tags netgo -o release/linux/arm/github-releases-notifier
+  - go build -v -ldflags "-X main.version=${DRONE_COMMIT_SHA:0:8}" -a -tags netgo -o release/arm/github-releases-notifier
   environment:
     CGO_ENABLED: 0
   when:
@@ -210,7 +210,7 @@ steps:
 - name: build-tag
   image: golang:1.12
   commands:
-  - go build -v -ldflags "-X main.version=${DRONE_TAG##v}" -a -tags netgo -o release/linux/arm/github-releases-notifier
+  - go build -v -ldflags "-X main.version=${DRONE_TAG##v}" -a -tags netgo -o release/arm/github-releases-notifier
   environment:
     CGO_ENABLED: 0
   when:
@@ -220,17 +220,17 @@ steps:
 - name: executable
   image: golang:1.12
   commands:
-  - ./release/linux/arm/github-releases-notifier --help
+  - ./release/arm/github-releases-notifier --help
 
 - name: dryrun
   image: plugins/docker
   settings:
-    dockerfile: docker/Dockerfile.linux.arm
+    dockerfile: docker/Dockerfile.arm
     dry_run: true
     password:
       from_secret: docker_password
     repo: xoxys/github-releases-notifier
-    tags: linux-arm
+    tags: arm
     username:
       from_secret: docker_username
   when:
@@ -241,8 +241,8 @@ steps:
   image: plugins/docker
   settings:
     auto_tag: true
-    auto_tag_suffix: linux-arm
-    dockerfile: docker/Dockerfile.linux.arm
+    auto_tag_suffix: arm
+    dockerfile: docker/Dockerfile.arm
     password:
       from_secret: docker_password
     repo: xoxys/github-releases-notifier
@@ -296,14 +296,17 @@ trigger:
   ref:
   - refs/heads/master
   - refs/tags/**
+  status:
+  - success
+  - failure
 
 depends_on:
-- linux-amd64
-- linux-arm64
-- linux-arm
+- build-container-amd64
+- build-container-arm64
+- build-container-arm
 
 ---
 kind: signature
-hmac: 4d1e4e2ae2b63f0a0175b226233cc3694e04068ea8a5899c802de21dfa795999
+hmac: c29f1291ef90ed62fa03a3788fc0e9dc03c9f76adc5adabd3097ee934aa3582b
 
 ...

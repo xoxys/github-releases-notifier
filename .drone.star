@@ -75,7 +75,7 @@ def linux(arch):
   return {
     'kind': 'pipeline',
     'type': 'docker',
-    'name': 'linux-%s' % arch,
+    'name': 'build-container-%s' % arch,
     'platform': {
       'os': 'linux',
       'arch': arch,
@@ -88,7 +88,7 @@ def linux(arch):
           'CGO_ENABLED': '0'
         },
         'commands': [
-          'go build -v -ldflags "-X main.version=${DRONE_COMMIT_SHA:0:8}" -a -tags netgo -o release/linux/%s/github-releases-notifier' % arch
+          'go build -v -ldflags "-X main.version=${DRONE_COMMIT_SHA:0:8}" -a -tags netgo -o release/%s/github-releases-notifier' % arch
         ],
         'when': {
           'event': {
@@ -105,7 +105,7 @@ def linux(arch):
           'CGO_ENABLED': '0'
         },
         'commands': [
-          'go build -v -ldflags "-X main.version=${DRONE_TAG##v}" -a -tags netgo -o release/linux/%s/github-releases-notifier' % arch
+          'go build -v -ldflags "-X main.version=${DRONE_TAG##v}" -a -tags netgo -o release/%s/github-releases-notifier' % arch
         ],
         'when': {
           'event': [
@@ -117,7 +117,7 @@ def linux(arch):
         'name': 'executable',
         'image': 'golang:1.12',
         'commands': [
-          './release/linux/%s/github-releases-notifier --help' % arch
+          './release/%s/github-releases-notifier --help' % arch
         ]
       },
       {
@@ -125,8 +125,8 @@ def linux(arch):
         'image': 'plugins/docker',
         'settings': {
           'dry_run': True,
-          'tags': 'linux-%s' % arch,
-          'dockerfile': 'docker/Dockerfile.linux.%s' % arch,
+          'tags': arch,
+          'dockerfile': 'docker/Dockerfile.%s' % arch,
           'repo': 'xoxys/github-releases-notifier',
           'username': {
             'from_secret': 'docker_username'
@@ -146,8 +146,8 @@ def linux(arch):
         'image': 'plugins/docker',
         'settings': {
           'auto_tag': True,
-          'auto_tag_suffix': 'linux-%s' % arch,
-          'dockerfile': 'docker/Dockerfile.linux.%s' % arch,
+          'auto_tag_suffix': arch,
+          'dockerfile': 'docker/Dockerfile.%s' % arch,
           'repo': 'xoxys/github-releases-notifier',
           'username': {
             'from_secret': 'docker_username'
