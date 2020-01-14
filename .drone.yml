@@ -271,9 +271,6 @@ platform:
   os: linux
   arch: amd64
 
-clone:
-  disable: true
-
 steps:
 - name: manifest
   image: plugins/manifest
@@ -313,6 +310,6 @@ depends_on:
 
 ---
 kind: signature
-hmac: 8c65eff50af8574d8623946b9337b1befe6abc179d13bfcea2ea97deab2e84f6
+hmac: f15877ab66dddf208fe6c8df97b8c6cbec01b48f4b78061fe33421c3884356df
 
 ...

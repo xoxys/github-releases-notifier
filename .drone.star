@@ -180,15 +180,12 @@ def notification():
     'kind': 'pipeline',
     'type': 'docker',
     'name': 'notification',
-    'clone': {
-      'disable': True
-    },
     'steps': [
       {
         'name': 'manifest',
         'image': 'plugins/manifest',
         'settings': {
-          'auto_tag': 'true',
+          'auto_tag': True,
           'username': {
             'from_secret': 'docker_username'
           },
