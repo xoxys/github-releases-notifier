@@ -287,7 +287,7 @@ steps:
     - success
 
 - name: microbadger
-  image: plugins/manifest
+  image: plugins/webhook
   settings:
     urls:
       from_secret: microbadger_url
@@ -310,6 +310,6 @@ depends_on:
 
 ---
 kind: signature
-hmac: 3c5a540d6771dd1daf780df4a1f3cc5b73e77be37ed9334762e8582507a6e385
+hmac: 0de8af9792e89d979830af171dfe80d182026c65bd31261e8d142f112078b51b
 
 ...

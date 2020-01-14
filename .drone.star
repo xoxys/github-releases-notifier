@@ -203,7 +203,7 @@ def notification():
       },
       {
         'name': 'microbadger',
-        'image': 'plugins/manifest',
+        'image': 'plugins/webhook',
         'settings': {
           'urls': {
             'from_secret': 'microbadger_url'
