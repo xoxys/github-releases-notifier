@@ -285,6 +285,9 @@ steps:
     spec: docker/manifest.tmpl
     username:
       from_secret: docker_username
+  when:
+    status:
+    - success
 
 - name: microbadger
   image: xoxys/github-releases-notifier
@@ -294,12 +297,14 @@ steps:
   when:
     status:
     - success
-    - failure
 
 trigger:
   ref:
   - refs/heads/master
   - refs/tags/**
+  status:
+  - success
+  - failure
 
 depends_on:
 - build-container-amd64
@@ -308,6 +313,6 @@ depends_on:
 
 ---
 kind: signature
-hmac: 8ec9a1f75b74bdacdf65eb5df4cc72aa22c57641ee9efb8186a8310c2459d4d2
+hmac: 8c65eff50af8574d8623946b9337b1befe6abc179d13bfcea2ea97deab2e84f6
 
 ...

@@ -198,6 +198,11 @@ def notification():
           'spec': 'docker/manifest.tmpl',
           'ignore_missing': 'true',
         },
+        'when' : {
+          'status': [
+            'success',
+          ]
+        },
       },
       {
         'name': 'microbadger',
@@ -210,7 +215,6 @@ def notification():
         'when' : {
           'status': [
             'success',
-            'failure'
           ]
         },
       },
@@ -221,5 +225,9 @@ def notification():
         'refs/heads/master',
         'refs/tags/**'
       ],
+      'status': [
+        'success',
+        'failure'
+      ]
     }
   }]
