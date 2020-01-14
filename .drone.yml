@@ -302,4 +302,8 @@ depends_on:
 - linux-arm64
 - linux-arm
 
+---
+kind: signature
+hmac: 4d1e4e2ae2b63f0a0175b226233cc3694e04068ea8a5899c802de21dfa795999
+
 ...

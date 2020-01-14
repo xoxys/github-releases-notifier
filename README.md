@@ -1,7 +1,9 @@
 # github-releases-notifier
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/justwatchcom/github-releases-notifier)](https://goreportcard.com/report/github.com/justwatchcom/github-releases-notifier)
-[![Docker Pulls](https://img.shields.io/docker/pulls/justwatch/github-releases-notifier.svg?maxAge=604800)](https://hub.docker.com/r/justwatch/github-releases-notifier)
+
+[![Build Status](https://cloud.drone.io/api/badges/xoxys/github-releases-notifier/status.svg)](https://cloud.drone.io/xoxys/github-releases-notifier)
+[![Go Report Card](https://goreportcard.com/badge/github.com/xoxys/github-releases-notifier)](https://goreportcard.com/report/github.com/xoxyscom/github-releases-notifier)
+[![Docker Pulls](https://img.shields.io/docker/pulls/xoxys/github-releases-notifier.svg?maxAge=604800)](https://hub.docker.com/r/xoxys/github-releases-notifier)
 
 Receive Slack notifications if a new release of your favorite software is available on GitHub.
 
@@ -19,7 +21,7 @@ To watch repositories simply add them to the list of arguments `-r=kubernetes/ku
 #### Docker
 
 ```
-docker run --rm -e GITHUB_TOKEN=XXX -e SLACK_HOOK=https://hooks.slack.com/... justwatch/github-releases-notifier -r=kubernetes/kubernetes
+docker run --rm -e GITHUB_TOKEN=XXX -e SLACK_HOOK=https://hooks.slack.com/... xoxys/github-releases-notifier -r=kubernetes/kubernetes
 ```
 
 #### docker-compose
