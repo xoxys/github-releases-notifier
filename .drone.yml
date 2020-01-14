@@ -291,14 +291,15 @@ steps:
   settings:
     urls:
       from_secret: microbadger_url
+  when:
+    status:
+    - success
+    - failure
 
 trigger:
   ref:
   - refs/heads/master
   - refs/tags/**
-  status:
-  - success
-  - failure
 
 depends_on:
 - build-container-amd64
@@ -307,6 +308,6 @@ depends_on:
 
 ---
 kind: signature
-hmac: c29f1291ef90ed62fa03a3788fc0e9dc03c9f76adc5adabd3097ee934aa3582b
+hmac: 8ec9a1f75b74bdacdf65eb5df4cc72aa22c57641ee9efb8186a8310c2459d4d2
 
 ...

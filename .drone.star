@@ -207,6 +207,12 @@ def notification():
             'from_secret': 'microbadger_url'
           }
         },
+        'when' : {
+          'status': [
+            'success',
+            'failure'
+          ]
+        },
       },
     ],
     'depends_on': [],
@@ -215,9 +221,5 @@ def notification():
         'refs/heads/master',
         'refs/tags/**'
       ],
-      'status': [
-        'success',
-        'failure'
-      ]
     }
   }]
