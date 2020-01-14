@@ -10,17 +10,18 @@ import (
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
 	"github.com/joho/godotenv"
-	"github.com/shurcooL/githubql"
+	"github.com/shurcooL/githubv4"
 	"golang.org/x/oauth2"
 )
 
 // Config of env and args
 type Config struct {
-	GithubToken  string        `arg:"env:GITHUB_TOKEN"`
+	GithubToken  string        `arg:"env:GITHUB_TOKEN,required"`
 	Interval     time.Duration `arg:"env:INTERVAL"`
 	LogLevel     string        `arg:"env:LOG_LEVEL"`
-	Repositories []string      `arg:"-r,separate"`
-	SlackHook    string        `arg:"env:SLACK_HOOK"`
+	Repositories []string      `arg:"env:GITHUB_REPOS,-r,separate"`
+	SlackHook    string        `arg:"env:SLACK_HOOK,required"`
+	IgnorePre    bool          `arg:"env:IGNORE_PRE"`
 }
 
 // Token returns an oauth2 token or an error.
@@ -43,7 +44,6 @@ func main() {
 		"caller", log.Caller(5),
 	)
 
-	level.SetKey("severity")
 	switch strings.ToLower(c.LogLevel) {
 	case "debug":
 		logger = level.NewFilter(logger, level.AllowDebug())
@@ -59,11 +59,11 @@ func main() {
 	client := oauth2.NewClient(context.Background(), tokenSource)
 	checker := &Checker{
 		logger: logger,
-		client: githubql.NewClient(client),
+		client: githubv4.NewClient(client),
 	}
 
 	releases := make(chan Repository)
-	go checker.Run(c.Interval, c.Repositories, releases)
+	go checker.Run(c.Interval, c.Repositories, c.IgnorePre, releases)
 
 	slack := SlackSender{Hook: c.SlackHook}
 

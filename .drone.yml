@@ -1,0 +1,305 @@
+---
+kind: pipeline
+type: docker
+name: testing
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: vet
+  image: golang:1.12
+  commands:
+  - go vet ./...
+  volumes:
+  - name: gopath
+    path: /go
+
+- name: test
+  image: golang:1.12
+  commands:
+  - go test -cover ./...
+  volumes:
+  - name: gopath
+    path: /go
+
+volumes:
+- name: gopath
+  temp: {}
+
+trigger:
+  ref:
+  - refs/heads/master
+  - refs/tags/**
+  - refs/pull/**
+
+---
+kind: pipeline
+type: docker
+name: linux-amd64
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build-push
+  image: golang:1.12
+  commands:
+  - go build -v -ldflags "-X main.version=${DRONE_COMMIT_SHA:0:8}" -a -tags netgo -o release/linux/amd64/github-releases-notifier
+  environment:
+    CGO_ENABLED: 0
+  when:
+    event:
+      exclude:
+      - tag
+
+- name: build-tag
+  image: golang:1.12
+  commands:
+  - go build -v -ldflags "-X main.version=${DRONE_TAG##v}" -a -tags netgo -o release/linux/amd64/github-releases-notifier
+  environment:
+    CGO_ENABLED: 0
+  when:
+    event:
+    - tag
+
+- name: executable
+  image: golang:1.12
+  commands:
+  - ./release/linux/amd64/github-releases-notifier --help
+
+- name: dryrun
+  image: plugins/docker
+  settings:
+    dockerfile: docker/Dockerfile.linux.amd64
+    dry_run: true
+    password:
+      from_secret: docker_password
+    repo: xoxys/github-releases-notifier
+    tags: linux-amd64
+    username:
+      from_secret: docker_username
+  when:
+    event:
+    - pull_request
+
+- name: publish
+  image: plugins/docker
+  settings:
+    auto_tag: true
+    auto_tag_suffix: linux-amd64
+    dockerfile: docker/Dockerfile.linux.amd64
+    password:
+      from_secret: docker_password
+    repo: xoxys/github-releases-notifier
+    username:
+      from_secret: docker_username
+  when:
+    event:
+      exclude:
+      - pull_request
+
+trigger:
+  ref:
+  - refs/heads/master
+  - refs/tags/**
+  - refs/pull/**
+
+depends_on:
+- testing
+
+---
+kind: pipeline
+type: docker
+name: linux-arm64
+
+platform:
+  os: linux
+  arch: arm64
+
+steps:
+- name: build-push
+  image: golang:1.12
+  commands:
+  - go build -v -ldflags "-X main.version=${DRONE_COMMIT_SHA:0:8}" -a -tags netgo -o release/linux/arm64/github-releases-notifier
+  environment:
+    CGO_ENABLED: 0
+  when:
+    event:
+      exclude:
+      - tag
+
+- name: build-tag
+  image: golang:1.12
+  commands:
+  - go build -v -ldflags "-X main.version=${DRONE_TAG##v}" -a -tags netgo -o release/linux/arm64/github-releases-notifier
+  environment:
+    CGO_ENABLED: 0
+  when:
+    event:
+    - tag
+
+- name: executable
+  image: golang:1.12
+  commands:
+  - ./release/linux/arm64/github-releases-notifier --help
+
+- name: dryrun
+  image: plugins/docker
+  settings:
+    dockerfile: docker/Dockerfile.linux.arm64
+    dry_run: true
+    password:
+      from_secret: docker_password
+    repo: xoxys/github-releases-notifier
+    tags: linux-arm64
+    username:
+      from_secret: docker_username
+  when:
+    event:
+    - pull_request
+
+- name: publish
+  image: plugins/docker
+  settings:
+    auto_tag: true
+    auto_tag_suffix: linux-arm64
+    dockerfile: docker/Dockerfile.linux.arm64
+    password:
+      from_secret: docker_password
+    repo: xoxys/github-releases-notifier
+    username:
+      from_secret: docker_username
+  when:
+    event:
+      exclude:
+      - pull_request
+
+trigger:
+  ref:
+  - refs/heads/master
+  - refs/tags/**
+  - refs/pull/**
+
+depends_on:
+- testing
+
+---
+kind: pipeline
+type: docker
+name: linux-arm
+
+platform:
+  os: linux
+  arch: arm
+
+steps:
+- name: build-push
+  image: golang:1.12
+  commands:
+  - go build -v -ldflags "-X main.version=${DRONE_COMMIT_SHA:0:8}" -a -tags netgo -o release/linux/arm/github-releases-notifier
+  environment:
+    CGO_ENABLED: 0
+  when:
+    event:
+      exclude:
+      - tag
+
+- name: build-tag
+  image: golang:1.12
+  commands:
+  - go build -v -ldflags "-X main.version=${DRONE_TAG##v}" -a -tags netgo -o release/linux/arm/github-releases-notifier
+  environment:
+    CGO_ENABLED: 0
+  when:
+    event:
+    - tag
+
+- name: executable
+  image: golang:1.12
+  commands:
+  - ./release/linux/arm/github-releases-notifier --help
+
+- name: dryrun
+  image: plugins/docker
+  settings:
+    dockerfile: docker/Dockerfile.linux.arm
+    dry_run: true
+    password:
+      from_secret: docker_password
+    repo: xoxys/github-releases-notifier
+    tags: linux-arm
+    username:
+      from_secret: docker_username
+  when:
+    event:
+    - pull_request
+
+- name: publish
+  image: plugins/docker
+  settings:
+    auto_tag: true
+    auto_tag_suffix: linux-arm
+    dockerfile: docker/Dockerfile.linux.arm
+    password:
+      from_secret: docker_password
+    repo: xoxys/github-releases-notifier
+    username:
+      from_secret: docker_username
+  when:
+    event:
+      exclude:
+      - pull_request
+
+trigger:
+  ref:
+  - refs/heads/master
+  - refs/tags/**
+  - refs/pull/**
+
+depends_on:
+- testing
+
+---
+kind: pipeline
+type: docker
+name: notification
+
+platform:
+  os: linux
+  arch: amd64
+
+clone:
+  disable: true
+
+steps:
+- name: manifest
+  image: plugins/manifest
+  settings:
+    auto_tag: true
+    ignore_missing: true
+    password:
+      from_secret: docker_password
+    spec: docker/manifest.tmpl
+    username:
+      from_secret: docker_username
+
+- name: microbadger
+  image: xoxys/github-releases-notifier
+  settings:
+    urls:
+      from_secret: microbadger_url
+
+trigger:
+  ref:
+  - refs/heads/master
+  - refs/tags/**
+
+depends_on:
+- linux-amd64
+- linux-arm64
+- linux-arm
+
+...

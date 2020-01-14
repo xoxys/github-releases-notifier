@@ -7,9 +7,10 @@ import (
 
 // Release of a repository tagged via GitHub.
 type Release struct {
-	ID          string
-	Name        string
-	Description string
-	URL         url.URL
-	PublishedAt time.Time
+	ID           string
+	Name         string
+	Description  string
+	URL          url.URL
+	PublishedAt  time.Time
+	IsPrerelease bool
 }
