@@ -1,5 +1,5 @@
 FROM alpine:3.10
 RUN apk --no-cache add ca-certificates
 
-ADD release/amd/github-releases-notifier /bin/
+ADD release/arm/github-releases-notifier /bin/
 ENTRYPOINT [ "/bin/github-releases-notifier" ]
