@@ -14,6 +14,9 @@ import (
 	"golang.org/x/oauth2"
 )
 
+// Version of current build
+var Version = "devel"
+
 // Config of env and args
 type Config struct {
 	GithubToken  string        `arg:"env:GITHUB_TOKEN,required"`
@@ -27,6 +30,11 @@ type Config struct {
 // Token returns an oauth2 token or an error.
 func (c Config) Token() *oauth2.Token {
 	return &oauth2.Token{AccessToken: c.GithubToken}
+}
+
+// Version prints version string
+func (Config) Version() string {
+	return "github-releases-notifier " + Version
 }
 
 func main() {

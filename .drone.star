@@ -5,6 +5,7 @@ def main(ctx):
     linux('amd64'),
     linux('arm64'),
     linux('arm'),
+    binaries([]),
   ]
 
   after = notification()
@@ -82,42 +83,23 @@ def linux(arch):
     },
     'steps': [
       {
-        'name': 'build-push',
+        'name': 'build',
         'image': 'golang:1.12',
         'environment': {
-          'CGO_ENABLED': '0'
+          'CGO_ENABLED': '0',
+          'BUILD_VERSION': '${DRONE_TAG##v}'
         },
         'commands': [
-          'go build -v -ldflags "-X main.version=${DRONE_COMMIT_SHA:0:8}" -a -tags netgo -o release/%s/github-releases-notifier' % arch
+          '[ -z "${BUILD_VERSION}" ] && BUILD_VERSION=${DRONE_COMMIT_SHA:0:8}',
+          'go build -v -ldflags "-X main.Version=$BUILD_VERSION" -a -tags netgo -o release/%s/github-releases-notifier' % arch
         ],
-        'when': {
-          'event': {
-            'exclude': [
-              'tag'
-            ]
-          }
-        }
-      },
-      {
-        'name': 'build-tag',
-        'image': 'golang:1.12',
-        'environment': {
-          'CGO_ENABLED': '0'
-        },
-        'commands': [
-          'go build -v -ldflags "-X main.version=${DRONE_TAG##v}" -a -tags netgo -o release/%s/github-releases-notifier' % arch
-        ],
-        'when': {
-          'event': [
-            'tag'
-          ]
-        }
       },
       {
         'name': 'executable',
         'image': 'golang:1.12',
         'commands': [
-          './release/%s/github-releases-notifier --help' % arch
+          './release/%s/github-releases-notifier --help' % arch,
+          './release/%s/github-releases-notifier --version' % arch
         ]
       },
       {
@@ -162,6 +144,54 @@ def linux(arch):
               'pull_request'
             ]
           }
+        }
+      }
+    ],
+    'depends_on': [],
+    'trigger': {
+      'ref': [
+        'refs/heads/master',
+        'refs/tags/**',
+        'refs/pull/**'
+      ]
+    }
+  }
+
+def binaries(arch):
+  return {
+    'kind': 'pipeline',
+    'type': 'docker',
+    'name': 'build-binaries',
+    'steps': [
+      {
+        'name': 'build',
+        'image': 'techknowlogick/xgo:latest',
+        'environment': {
+          'BUILD_VERSION': '${DRONE_TAG##v}'
+        },
+        'commands': [
+          '[ -z "${BUILD_VERSION}" ] && BUILD_VERSION=${DRONE_COMMIT_SHA:0:8}',
+          'mkdir -p release/',
+          "xgo -ldflags \"-X main.Version=$BUILD_VERSION\" -tags netgo -targets 'linux/amd64,linux/arm-6,linux/arm64' -out github-releases-notifier-$BUILD_VERSION .",
+          'cp /build/* release/',
+          'ls -lah release/'
+        ]
+      },
+      {
+        'name': 'publish',
+        'image': 'plugins/github-release',
+        'settings': {
+          'overwrite': True,
+          'api_key': {
+            'from_secret': 'github_token'
+          },
+          'title': '${DRONE_TAG}',
+          'note': 'CHANGELOG.md',
+        },
+        'when': {
+          'ref': [
+            'refs/tags/**'
+          ]
         }
       }
     ],

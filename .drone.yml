@@ -44,31 +44,20 @@ platform:
   arch: amd64
 
 steps:
-- name: build-push
+- name: build
   image: golang:1.12
   commands:
-  - go build -v -ldflags "-X main.version=${DRONE_COMMIT_SHA:0:8}" -a -tags netgo -o release/amd64/github-releases-notifier
+  - "[ -z \"${BUILD_VERSION}\" ] && BUILD_VERSION=${DRONE_COMMIT_SHA:0:8}"
+  - go build -v -ldflags "-X main.Version=$BUILD_VERSION" -a -tags netgo -o release/amd64/github-releases-notifier
   environment:
+    BUILD_VERSION: ${DRONE_TAG##v}
     CGO_ENABLED: 0
-  when:
-    event:
-      exclude:
-      - tag
-
-- name: build-tag
-  image: golang:1.12
-  commands:
-  - go build -v -ldflags "-X main.version=${DRONE_TAG##v}" -a -tags netgo -o release/amd64/github-releases-notifier
-  environment:
-    CGO_ENABLED: 0
-  when:
-    event:
-    - tag
 
 - name: executable
   image: golang:1.12
   commands:
   - ./release/amd64/github-releases-notifier --help
+  - ./release/amd64/github-releases-notifier --version
 
 - name: dryrun
   image: plugins/docker
@@ -120,31 +109,20 @@ platform:
   arch: arm64
 
 steps:
-- name: build-push
+- name: build
   image: golang:1.12
   commands:
-  - go build -v -ldflags "-X main.version=${DRONE_COMMIT_SHA:0:8}" -a -tags netgo -o release/arm64/github-releases-notifier
+  - "[ -z \"${BUILD_VERSION}\" ] && BUILD_VERSION=${DRONE_COMMIT_SHA:0:8}"
+  - go build -v -ldflags "-X main.Version=$BUILD_VERSION" -a -tags netgo -o release/arm64/github-releases-notifier
   environment:
+    BUILD_VERSION: ${DRONE_TAG##v}
     CGO_ENABLED: 0
-  when:
-    event:
-      exclude:
-      - tag
-
-- name: build-tag
-  image: golang:1.12
-  commands:
-  - go build -v -ldflags "-X main.version=${DRONE_TAG##v}" -a -tags netgo -o release/arm64/github-releases-notifier
-  environment:
-    CGO_ENABLED: 0
-  when:
-    event:
-    - tag
 
 - name: executable
   image: golang:1.12
   commands:
   - ./release/arm64/github-releases-notifier --help
+  - ./release/arm64/github-releases-notifier --version
 
 - name: dryrun
   image: plugins/docker
@@ -196,31 +174,20 @@ platform:
   arch: arm
 
 steps:
-- name: build-push
+- name: build
   image: golang:1.12
   commands:
-  - go build -v -ldflags "-X main.version=${DRONE_COMMIT_SHA:0:8}" -a -tags netgo -o release/arm/github-releases-notifier
+  - "[ -z \"${BUILD_VERSION}\" ] && BUILD_VERSION=${DRONE_COMMIT_SHA:0:8}"
+  - go build -v -ldflags "-X main.Version=$BUILD_VERSION" -a -tags netgo -o release/arm/github-releases-notifier
   environment:
+    BUILD_VERSION: ${DRONE_TAG##v}
     CGO_ENABLED: 0
-  when:
-    event:
-      exclude:
-      - tag
-
-- name: build-tag
-  image: golang:1.12
-  commands:
-  - go build -v -ldflags "-X main.version=${DRONE_TAG##v}" -a -tags netgo -o release/arm/github-releases-notifier
-  environment:
-    CGO_ENABLED: 0
-  when:
-    event:
-    - tag
 
 - name: executable
   image: golang:1.12
   commands:
   - ./release/arm/github-releases-notifier --help
+  - ./release/arm/github-releases-notifier --version
 
 - name: dryrun
   image: plugins/docker
@@ -252,6 +219,48 @@ steps:
     event:
       exclude:
       - pull_request
+
+trigger:
+  ref:
+  - refs/heads/master
+  - refs/tags/**
+  - refs/pull/**
+
+depends_on:
+- testing
+
+---
+kind: pipeline
+type: docker
+name: build-binaries
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: build
+  image: techknowlogick/xgo:latest
+  commands:
+  - "[ -z \"${BUILD_VERSION}\" ] && BUILD_VERSION=${DRONE_COMMIT_SHA:0:8}"
+  - mkdir -p release/
+  - xgo -ldflags "-X main.Version=$BUILD_VERSION" -tags netgo -targets 'linux/amd64,linux/arm-6,linux/arm64' -out github-releases-notifier-$BUILD_VERSION .
+  - cp /build/* release/
+  - ls -lah release/
+  environment:
+    BUILD_VERSION: ${DRONE_TAG##v}
+
+- name: publish
+  image: plugins/github-release
+  settings:
+    api_key:
+      from_secret: github_token
+    note: CHANGELOG.md
+    overwrite: true
+    title: ${DRONE_TAG}
+  when:
+    ref:
+    - refs/tags/**
 
 trigger:
   ref:
@@ -332,9 +341,10 @@ depends_on:
 - build-container-amd64
 - build-container-arm64
 - build-container-arm
+- build-binaries
 
 ---
 kind: signature
-hmac: 48723ecce577b6addd70c457f07360a1986bbb43b56034619bf9843efc797a4a
+hmac: 4c60720bd47e885df1e36d84a68edb5e4fb4f9030113a52dda16b37a7da11f85
 
 ...
