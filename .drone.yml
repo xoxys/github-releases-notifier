@@ -240,7 +240,6 @@ steps:
   - mkdir -p release/
   - xgo -ldflags "-X main.Version=$BUILD_VERSION" -tags netgo -targets 'linux/amd64,linux/arm-6,linux/arm64' -out github-releases-notifier-$BUILD_VERSION .
   - cp /build/* release/
-  - ls -lah release/
 
 - name: checksum
   image: alpine
@@ -344,6 +343,6 @@ depends_on:
 
 ---
 kind: signature
-hmac: db1cd58f6fe402fec379a32614bbda189901ac1b80e92fa20a552bd69eddff20
+hmac: 982d7a70f6cd3914794b3d085b7f949e72445698d9d4af06323239f98cf83058
 
 ...
