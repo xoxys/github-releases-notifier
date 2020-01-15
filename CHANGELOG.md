@@ -1,0 +1,6 @@
+- FEATURE
+  - add env variable `GITHUB_REPOS`
+  - add env variable `IGNORE_PRE`
+- INTERNAL
+  - provide also binary releases
+  - switch to gomod instead of vendor folder

@@ -178,6 +178,14 @@ def binaries(arch):
         ]
       },
       {
+        'name': 'checksum',
+        'image': 'alpine',
+        'commands': [
+            'cd release/ && sha256sum * > sha256sum.txt',
+            'cat sha256sum.txt'
+        ],
+      },
+      {
         'name': 'publish',
         'image': 'plugins/github-release',
         'settings': {
@@ -185,6 +193,7 @@ def binaries(arch):
           'api_key': {
             'from_secret': 'github_token'
           },
+          'files': [ "release/*" ],
           'title': '${DRONE_TAG}',
           'note': 'CHANGELOG.md',
         },

@@ -250,11 +250,19 @@ steps:
   environment:
     BUILD_VERSION: ${DRONE_TAG##v}
 
+- name: checksum
+  image: alpine
+  commands:
+  - cd release/ && sha256sum * > sha256sum.txt
+  - cat sha256sum.txt
+
 - name: publish
   image: plugins/github-release
   settings:
     api_key:
       from_secret: github_token
+    files:
+    - release/*
     note: CHANGELOG.md
     overwrite: true
     title: ${DRONE_TAG}
@@ -345,6 +353,6 @@ depends_on:
 
 ---
 kind: signature
-hmac: 4c60720bd47e885df1e36d84a68edb5e4fb4f9030113a52dda16b37a7da11f85
+hmac: dfd7579768ef56661e69f51498b32a2cedc72869c01876711963f7f9b8d76fc4
 
 ...
