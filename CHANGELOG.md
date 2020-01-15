@@ -1,6 +1,8 @@
 - FEATURE
   - add env variable `GITHUB_REPOS`
   - add env variable `IGNORE_PRE`
+- BUGFIX
+  - add `required` flag for GitHub token and Slack hook
 - INTERNAL
   - provide also binary releases
   - switch to gomod instead of vendor folder
