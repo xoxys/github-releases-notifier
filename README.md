@@ -5,7 +5,7 @@ GitHub release notification bot
 [![Build Status](https://img.shields.io/drone/build/thegeeklab/github-releases-notifier?logo=drone)](https://cloud.drone.io/thegeeklab/github-releases-notifier)
 [![Docker Hub](https://img.shields.io/badge/dockerhub-latest-blue.svg?logo=docker&logoColor=white)](https://hub.docker.com/r/thegeeklab/github-releases-notifier)
 [![Quay.io](https://img.shields.io/badge/quay-latest-blue.svg?logo=docker&logoColor=white)](https://quay.io/repository/thegeeklab/github-releases-notifier)
-[![Go Report Card](https://goreportcard.com/badge/github.com/thegeeklab/github-releases-notifier)](https://goreportcard.com/report/github.com/thegeeklabcom/github-releases-notifier)
+[![Go Report Card](https://goreportcard.com/badge/github.com/thegeeklab/github-releases-notifier)](https://goreportcard.com/report/github.com/thegeeklab/github-releases-notifier)
 [![Source: GitHub](https://img.shields.io/badge/source-github-blue.svg?logo=github&logoColor=white)](https://github.com/thegeeklab/github-releases-notifier)
 [![License: MIT](https://img.shields.io/github/license/thegeeklab/github-releases-notifier)](<[LICENSE](https://github.com/thegeeklab/github-releases-notifier/blob/master/LICENSE)>)
 
