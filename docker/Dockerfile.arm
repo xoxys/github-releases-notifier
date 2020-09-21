@@ -1,4 +1,10 @@
-FROM alpine:3.10
+FROM alpine:3.12
+
+LABEL maintainer="Robert Kaussow <mail@thegeeklab.de>" \
+    org.label-schema.name="GitHub Release Notifier" \
+    org.label-schema.vendor="Robert Kaussow" \
+    org.label-schema.schema-version="1.0"
+
 RUN apk --no-cache add ca-certificates
 
 ADD release/arm/github-releases-notifier /bin/

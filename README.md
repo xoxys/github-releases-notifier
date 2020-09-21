@@ -1,46 +1,28 @@
 # github-releases-notifier
 
+GitHub release notification bot
 
-[![Build Status](https://cloud.drone.io/api/badges/xoxys/github-releases-notifier/status.svg)](https://cloud.drone.io/xoxys/github-releases-notifier)
-[![Go Report Card](https://goreportcard.com/badge/github.com/xoxys/github-releases-notifier)](https://goreportcard.com/report/github.com/xoxyscom/github-releases-notifier)
-[![Docker Pulls](https://img.shields.io/docker/pulls/xoxys/github-releases-notifier.svg?maxAge=604800)](https://hub.docker.com/r/xoxys/github-releases-notifier)
+[![Build Status](https://img.shields.io/drone/build/thegeeklab/github-releases-notifier?logo=drone)](https://cloud.drone.io/thegeeklab/github-releases-notifier)
+[![Docker Hub](https://img.shields.io/badge/dockerhub-latest-blue.svg?logo=docker&logoColor=white)](https://hub.docker.com/r/thegeeklab/github-releases-notifier)
+[![Quay.io](https://img.shields.io/badge/quay-latest-blue.svg?logo=docker&logoColor=white)](https://quay.io/repository/thegeeklab/github-releases-notifier)
+[![Go Report Card](https://goreportcard.com/badge/github.com/thegeeklab/github-releases-notifier)](https://goreportcard.com/report/github.com/thegeeklabcom/github-releases-notifier)
+[![Source: GitHub](https://img.shields.io/badge/source-github-blue.svg?logo=github&logoColor=white)](https://github.com/thegeeklab/github-releases-notifier)
+[![License: MIT](https://img.shields.io/github/license/thegeeklab/github-releases-notifier)](<[LICENSE](https://github.com/thegeeklab/github-releases-notifier/blob/master/LICENSE)>)
 
 Receive Slack notifications if a new release of your favorite software is available on GitHub.
 
-![screenshot.png](screenshot.png)
+## Setup
 
-### Watching repositories
+1. Get a URL to send WebHooks to your Slack.
+2. Get a token for scraping GitHub: [https://help.github.com/](https://docs.github.com/en/github/authenticating-to-github/creating-a-personal-access-token).
 
-To watch repositories simply add them to the list of arguments `-r=kubernetes/kubernetes -r=prometheus/prometheus` and so on.
+To watch repositories simply add them to the list of arguments e.g. `-r=kubernetes/kubernetes -r=prometheus/prometheus`.
 
-### Deploying
+### Docker
 
-1. Get a URL to send WebHooks to your Slack from https://api.slack.com/incoming-webhooks.
-2. Get a token for scraping GitHub: [https://help.github.com/](https://help.github.com/articles/creating-a-personal-access-token-for-the-command-line).
-
-#### Docker
-
+```Shell
+docker run --rm \
+    -e GITHUB_TOKEN=XXX \
+    -e SLACK_HOOK=https://hooks.slack.com/... \
+    thegeeklab/github-releases-notifier -r=kubernetes/kubernetes
 ```
-docker run --rm -e GITHUB_TOKEN=XXX -e SLACK_HOOK=https://hooks.slack.com/... xoxys/github-releases-notifier -r=kubernetes/kubernetes
-```
-
-#### docker-compose
-
-1. Change into the `deployments/` folder.
-2. Open `docker-compose.yml`
-3. Change the token in the environment section to the ones obtained above.
-4. `docker-compose up`
-
-#### Kubernetes
-
-```bash
-kubectl create secret generic github-releases-notifier \
-        --from-literal=github=XXX` \
-        --from-literal=slack=XXX
-```
-
-After creating the secret with your credentials you can apply the deployment:
-
-`kubectl apply -f deployments/kubernetes.yml`
-
-That's it.

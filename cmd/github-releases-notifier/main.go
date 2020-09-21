@@ -11,6 +11,8 @@ import (
 	"github.com/go-kit/kit/log/level"
 	"github.com/joho/godotenv"
 	"github.com/shurcooL/githubv4"
+	"github.com/thegeeklab/github-releases-notifier/internal/handler"
+	"github.com/thegeeklab/github-releases-notifier/internal/model"
 	"golang.org/x/oauth2"
 )
 
@@ -70,10 +72,10 @@ func main() {
 		client: githubv4.NewClient(client),
 	}
 
-	releases := make(chan Repository)
+	releases := make(chan model.Repository)
 	go checker.Run(c.Interval, c.Repositories, c.IgnorePre, releases)
 
-	slack := SlackSender{Hook: c.SlackHook}
+	slack := handler.SlackSender{Hook: c.SlackHook}
 
 	level.Info(logger).Log("msg", "waiting for new releases")
 	for repository := range releases {

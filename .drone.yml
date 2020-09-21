@@ -1,15 +1,30 @@
 ---
 kind: pipeline
-type: docker
-name: testing
+name: test
 
 platform:
   os: linux
   arch: amd64
 
 steps:
+- name: staticcheck
+  image: golang:1.14
+  commands:
+  - go run honnef.co/go/tools/cmd/staticcheck ./...
+  volumes:
+  - name: gopath
+    path: /go
+
+- name: lint
+  image: golang:1.14
+  commands:
+  - go run golang.org/x/lint/golint -set_exit_status ./...
+  volumes:
+  - name: gopath
+    path: /go
+
 - name: vet
-  image: golang:1.12
+  image: golang:1.14
   commands:
   - go vet ./...
   volumes:
@@ -17,7 +32,7 @@ steps:
     path: /go
 
 - name: test
-  image: golang:1.12
+  image: golang:1.14
   commands:
   - go test -cover ./...
   volumes:
@@ -36,196 +51,6 @@ trigger:
 
 ---
 kind: pipeline
-type: docker
-name: build-container-amd64
-
-platform:
-  os: linux
-  arch: amd64
-
-steps:
-- name: build
-  image: golang:1.12
-  commands:
-  - "[ -z \"${DRONE_TAG}\" ] && BUILD_VERSION=${DRONE_COMMIT_SHA:0:8} || BUILD_VERSION=${DRONE_TAG##v}"
-  - go build -v -ldflags "-X main.Version=$BUILD_VERSION" -a -tags netgo -o release/amd64/github-releases-notifier
-  environment:
-    CGO_ENABLED: 0
-
-- name: executable
-  image: golang:1.12
-  commands:
-  - ./release/amd64/github-releases-notifier --help
-
-- name: dryrun
-  image: plugins/docker
-  settings:
-    dockerfile: docker/Dockerfile.amd64
-    dry_run: true
-    password:
-      from_secret: docker_password
-    repo: xoxys/github-releases-notifier
-    tags: amd64
-    username:
-      from_secret: docker_username
-  when:
-    event:
-    - pull_request
-
-- name: publish
-  image: plugins/docker
-  settings:
-    auto_tag: true
-    auto_tag_suffix: amd64
-    dockerfile: docker/Dockerfile.amd64
-    password:
-      from_secret: docker_password
-    repo: xoxys/github-releases-notifier
-    username:
-      from_secret: docker_username
-  when:
-    event:
-      exclude:
-      - pull_request
-
-trigger:
-  ref:
-  - refs/heads/master
-  - refs/tags/**
-  - refs/pull/**
-
-depends_on:
-- testing
-
----
-kind: pipeline
-type: docker
-name: build-container-arm64
-
-platform:
-  os: linux
-  arch: arm64
-
-steps:
-- name: build
-  image: golang:1.12
-  commands:
-  - "[ -z \"${DRONE_TAG}\" ] && BUILD_VERSION=${DRONE_COMMIT_SHA:0:8} || BUILD_VERSION=${DRONE_TAG##v}"
-  - go build -v -ldflags "-X main.Version=$BUILD_VERSION" -a -tags netgo -o release/arm64/github-releases-notifier
-  environment:
-    CGO_ENABLED: 0
-
-- name: executable
-  image: golang:1.12
-  commands:
-  - ./release/arm64/github-releases-notifier --help
-
-- name: dryrun
-  image: plugins/docker
-  settings:
-    dockerfile: docker/Dockerfile.arm64
-    dry_run: true
-    password:
-      from_secret: docker_password
-    repo: xoxys/github-releases-notifier
-    tags: arm64
-    username:
-      from_secret: docker_username
-  when:
-    event:
-    - pull_request
-
-- name: publish
-  image: plugins/docker
-  settings:
-    auto_tag: true
-    auto_tag_suffix: arm64
-    dockerfile: docker/Dockerfile.arm64
-    password:
-      from_secret: docker_password
-    repo: xoxys/github-releases-notifier
-    username:
-      from_secret: docker_username
-  when:
-    event:
-      exclude:
-      - pull_request
-
-trigger:
-  ref:
-  - refs/heads/master
-  - refs/tags/**
-  - refs/pull/**
-
-depends_on:
-- testing
-
----
-kind: pipeline
-type: docker
-name: build-container-arm
-
-platform:
-  os: linux
-  arch: arm
-
-steps:
-- name: build
-  image: golang:1.12
-  commands:
-  - "[ -z \"${DRONE_TAG}\" ] && BUILD_VERSION=${DRONE_COMMIT_SHA:0:8} || BUILD_VERSION=${DRONE_TAG##v}"
-  - go build -v -ldflags "-X main.Version=$BUILD_VERSION" -a -tags netgo -o release/arm/github-releases-notifier
-  environment:
-    CGO_ENABLED: 0
-
-- name: executable
-  image: golang:1.12
-  commands:
-  - ./release/arm/github-releases-notifier --help
-
-- name: dryrun
-  image: plugins/docker
-  settings:
-    dockerfile: docker/Dockerfile.arm
-    dry_run: true
-    password:
-      from_secret: docker_password
-    repo: xoxys/github-releases-notifier
-    tags: arm
-    username:
-      from_secret: docker_username
-  when:
-    event:
-    - pull_request
-
-- name: publish
-  image: plugins/docker
-  settings:
-    auto_tag: true
-    auto_tag_suffix: arm
-    dockerfile: docker/Dockerfile.arm
-    password:
-      from_secret: docker_password
-    repo: xoxys/github-releases-notifier
-    username:
-      from_secret: docker_username
-  when:
-    event:
-      exclude:
-      - pull_request
-
-trigger:
-  ref:
-  - refs/heads/master
-  - refs/tags/**
-  - refs/pull/**
-
-depends_on:
-- testing
-
----
-kind: pipeline
-type: docker
 name: build-binaries
 
 platform:
@@ -234,12 +59,24 @@ platform:
 
 steps:
 - name: build
-  image: techknowlogick/xgo:latest
+  image: techknowlogick/xgo:go-1.14.x
   commands:
   - "[ -z \"${DRONE_TAG}\" ] && BUILD_VERSION=${DRONE_COMMIT_SHA:0:8} || BUILD_VERSION=${DRONE_TAG##v}"
   - mkdir -p release/
-  - xgo -ldflags "-X main.Version=$BUILD_VERSION" -tags netgo -targets 'linux/amd64,linux/arm-6,linux/arm64' -out github-releases-notifier-$BUILD_VERSION .
-  - cp /build/* release/
+  - cd cmd/github-releases-notifier && xgo -ldflags "-s -w -X main.version=$BUILD_VERSION" -tags netgo -targets 'linux/amd64,linux/arm-6,linux/arm64' -out github-releases-notifier .
+  - mv /build/* /drone/src/release/
+
+- name: executable
+  image: alpine
+  commands:
+  - $(find release/ -executable -type f | grep github-releases-notifier-linux-amd64) --help
+
+- name: compress
+  image: alpine
+  commands:
+  - apk add upx
+  - find release/ -maxdepth 1 -executable -type f -exec upx {} \;
+  - ls -lh release/
 
 - name: checksum
   image: alpine
@@ -267,19 +104,249 @@ trigger:
   - refs/pull/**
 
 depends_on:
-- testing
+- test
 
 ---
 kind: pipeline
-type: docker
-name: notification
+name: build-container-amd64
 
 platform:
   os: linux
   arch: amd64
 
 steps:
-- name: manifest
+- name: build
+  image: golang:1.14
+  commands:
+  - "[ -z \"${DRONE_TAG}\" ] && BUILD_VERSION=${DRONE_COMMIT_SHA:0:8} || BUILD_VERSION=${DRONE_TAG##v}"
+  - go build -v -ldflags "-X main.version=$BUILD_VERSION" -a -tags netgo -o release/amd64/github-releases-notifier ./cmd/github-releases-notifier
+
+- name: dryrun
+  image: plugins/docker:18-linux-amd64
+  settings:
+    dockerfile: docker/Dockerfile.amd64
+    dry_run: true
+    password:
+      from_secret: docker_password
+    repo: thegeeklab/${DRONE_REPO_NAME}
+    username:
+      from_secret: docker_username
+  when:
+    ref:
+    - refs/pull/**
+  depends_on:
+  - build
+
+- name: publish-dockerhub
+  image: plugins/docker:18-linux-amd64
+  settings:
+    auto_tag: true
+    auto_tag_suffix: amd64
+    dockerfile: docker/Dockerfile.amd64
+    password:
+      from_secret: docker_password
+    repo: thegeeklab/${DRONE_REPO_NAME}
+    username:
+      from_secret: docker_username
+  when:
+    ref:
+    - refs/heads/master
+    - refs/tags/**
+  depends_on:
+  - dryrun
+
+- name: publish-quay
+  image: plugins/docker:18-linux-amd64
+  settings:
+    auto_tag: true
+    auto_tag_suffix: amd64
+    dockerfile: docker/Dockerfile.amd64
+    password:
+      from_secret: quay_password
+    registry: quay.io
+    repo: quay.io/thegeeklab/${DRONE_REPO_NAME}
+    username:
+      from_secret: quay_username
+  when:
+    ref:
+    - refs/heads/master
+    - refs/tags/**
+  depends_on:
+  - dryrun
+
+trigger:
+  ref:
+  - refs/heads/master
+  - refs/tags/**
+  - refs/pull/**
+
+depends_on:
+- test
+
+---
+kind: pipeline
+name: build-container-arm64
+
+platform:
+  os: linux
+  arch: arm64
+
+steps:
+- name: build
+  image: golang:1.14
+  commands:
+  - "[ -z \"${DRONE_TAG}\" ] && BUILD_VERSION=${DRONE_COMMIT_SHA:0:8} || BUILD_VERSION=${DRONE_TAG##v}"
+  - go build -v -ldflags "-X main.version=$BUILD_VERSION" -a -tags netgo -o release/arm64/github-releases-notifier ./cmd/github-releases-notifier
+
+- name: dryrun
+  image: plugins/docker:18-linux-arm64
+  settings:
+    dockerfile: docker/Dockerfile.arm64
+    dry_run: true
+    password:
+      from_secret: docker_password
+    repo: thegeeklab/${DRONE_REPO_NAME}
+    username:
+      from_secret: docker_username
+  when:
+    ref:
+    - refs/pull/**
+  depends_on:
+  - build
+
+- name: publish-dockerhub
+  image: plugins/docker:18-linux-arm64
+  settings:
+    auto_tag: true
+    auto_tag_suffix: arm64
+    dockerfile: docker/Dockerfile.arm64
+    password:
+      from_secret: docker_password
+    repo: thegeeklab/${DRONE_REPO_NAME}
+    username:
+      from_secret: docker_username
+  when:
+    ref:
+    - refs/heads/master
+    - refs/tags/**
+  depends_on:
+  - dryrun
+
+- name: publish-quay
+  image: plugins/docker:18-linux-arm64
+  settings:
+    auto_tag: true
+    auto_tag_suffix: arm64
+    dockerfile: docker/Dockerfile.arm64
+    password:
+      from_secret: quay_password
+    registry: quay.io
+    repo: quay.io/thegeeklab/${DRONE_REPO_NAME}
+    username:
+      from_secret: quay_username
+  when:
+    ref:
+    - refs/heads/master
+    - refs/tags/**
+  depends_on:
+  - dryrun
+
+trigger:
+  ref:
+  - refs/heads/master
+  - refs/tags/**
+  - refs/pull/**
+
+depends_on:
+- test
+
+---
+kind: pipeline
+name: build-container-arm
+
+platform:
+  os: linux
+  arch: arm
+
+steps:
+- name: build
+  image: golang:1.14
+  commands:
+  - "[ -z \"${DRONE_TAG}\" ] && BUILD_VERSION=${DRONE_COMMIT_SHA:0:8} || BUILD_VERSION=${DRONE_TAG##v}"
+  - go build -v -ldflags "-X main.version=$BUILD_VERSION" -a -tags netgo -o release/arm/github-releases-notifier ./cmd/github-releases-notifier
+
+- name: dryrun
+  image: plugins/docker:18-linux-arm
+  settings:
+    dockerfile: docker/Dockerfile.arm
+    dry_run: true
+    password:
+      from_secret: docker_password
+    repo: thegeeklab/${DRONE_REPO_NAME}
+    username:
+      from_secret: docker_username
+  when:
+    ref:
+    - refs/pull/**
+  depends_on:
+  - build
+
+- name: publish-dockerhub
+  image: plugins/docker:18-linux-arm
+  settings:
+    auto_tag: true
+    auto_tag_suffix: arm
+    dockerfile: docker/Dockerfile.arm
+    password:
+      from_secret: docker_password
+    repo: thegeeklab/${DRONE_REPO_NAME}
+    username:
+      from_secret: docker_username
+  when:
+    ref:
+    - refs/heads/master
+    - refs/tags/**
+  depends_on:
+  - dryrun
+
+- name: publish-quay
+  image: plugins/docker:18-linux-arm
+  settings:
+    auto_tag: true
+    auto_tag_suffix: arm
+    dockerfile: docker/Dockerfile.arm
+    password:
+      from_secret: quay_password
+    registry: quay.io
+    repo: quay.io/thegeeklab/${DRONE_REPO_NAME}
+    username:
+      from_secret: quay_username
+  when:
+    ref:
+    - refs/heads/master
+    - refs/tags/**
+  depends_on:
+  - dryrun
+
+trigger:
+  ref:
+  - refs/heads/master
+  - refs/tags/**
+  - refs/pull/**
+
+depends_on:
+- test
+
+---
+kind: pipeline
+name: notifications
+
+platform:
+  os: linux
+  arch: amd64
+
+steps:
+- name: manifest-dockerhub
   image: plugins/manifest
   settings:
     auto_tag: true
@@ -293,23 +360,41 @@ steps:
     status:
     - success
 
-- name: readme
-  image: sheogorath/readme-to-dockerhub
-  environment:
-    DOCKERHUB_PASSWORD:
-      from_secret: docker_password
-    DOCKERHUB_REPO_NAME: github-releases-notifier
-    DOCKERHUB_REPO_PREFIX: xoxys
-    DOCKERHUB_USERNAME:
-      from_secret: docker_username
-    README_PATH: README.md
-    SHORT_DESCRIPTION: Receive Slack notifications for new GitHub releases
-
-- name: microbadger
-  image: plugins/webhook
+- name: manifest-quay
+  image: plugins/manifest
   settings:
-    urls:
-      from_secret: microbadger_url
+    auto_tag: true
+    ignore_missing: true
+    password:
+      from_secret: quay_password
+    spec: docker/manifest-quay.tmpl
+    username:
+      from_secret: quay_username
+  when:
+    status:
+    - success
+
+- name: pushrm-dockerhub
+  image: chko/docker-pushrm:1
+  environment:
+    DOCKER_PASS:
+      from_secret: docker_password
+    DOCKER_USER:
+      from_secret: docker_username
+    PUSHRM_FILE: README.md
+    PUSHRM_SHORT: GitHub Comment - Drone plugin to add comments to GitHub Issues/PRs
+    PUSHRM_TARGET: thegeeklab/${DRONE_REPO_NAME}
+  when:
+    status:
+    - success
+
+- name: pushrm-quay
+  image: chko/docker-pushrm:1
+  environment:
+    APIKEY__QUAY_IO:
+      from_secret: quay_token
+    PUSHRM_FILE: README.md
+    PUSHRM_TARGET: quay.io/thegeeklab/${DRONE_REPO_NAME}
   when:
     status:
     - success
@@ -326,6 +411,10 @@ steps:
     template: "Status: **{{ build.status }}**<br/> Build: [{{ repo.Owner }}/{{ repo.Name }}]({{ build.link }}) ({{ build.branch }}) by {{ build.author }}<br/> Message: {{ build.message }}"
     username:
       from_secret: matrix_username
+  when:
+    status:
+    - success
+    - failure
 
 trigger:
   ref:
@@ -336,13 +425,13 @@ trigger:
   - failure
 
 depends_on:
-- build-container-amd64
-- build-container-arm64
-- build-container-arm
 - build-binaries
+- build-container-amd64
+- build-container-arm
+- build-container-arm64
 
 ---
 kind: signature
-hmac: 982d7a70f6cd3914794b3d085b7f949e72445698d9d4af06323239f98cf83058
+hmac: 7fd3a4a3d079dd575030424aa90c99900def6bd2a7af88449933143009e28d99
 
 ...

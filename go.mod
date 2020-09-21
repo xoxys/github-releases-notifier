@@ -1,4 +1,4 @@
-module github.com/xoxys/github-releases-notifier
+module github.com/thegeeklab/github-releases-notifier
 
 go 1.13
 

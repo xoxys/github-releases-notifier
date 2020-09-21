@@ -9,6 +9,7 @@ import (
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
 	"github.com/shurcooL/githubv4"
+	"github.com/thegeeklab/github-releases-notifier/internal/model"
 )
 
 // Checker has a githubv4 client to run queries and also knows about
@@ -16,14 +17,14 @@ import (
 type Checker struct {
 	logger   log.Logger
 	client   *githubv4.Client
-	releases map[string]Repository
+	releases map[string]model.Repository
 }
 
 // Run the queries and comparisons for the given repositories in a given interval.
 func (c *Checker) Run(interval time.Duration, repositories []string,
-	ignorePre bool, releases chan<- Repository) {
+	ignorePre bool, releases chan<- model.Repository) {
 	if c.releases == nil {
-		c.releases = make(map[string]Repository)
+		c.releases = make(map[string]model.Repository)
 	}
 
 	for {
@@ -78,7 +79,7 @@ func (c *Checker) Run(interval time.Duration, repositories []string,
 // This should be improved in the future to make batch requests for all watched repositories at once
 // TODO: https://github.com/shurcooL/githubv4/issues/17
 
-func (c *Checker) query(owner, name string) (Repository, error) {
+func (c *Checker) query(owner, name string) (model.Repository, error) {
 	var query struct {
 		Repository struct {
 			ID          githubv4.ID
@@ -109,32 +110,32 @@ func (c *Checker) query(owner, name string) (Repository, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 	if err := c.client.Query(ctx, &query, variables); err != nil {
-		return Repository{}, err
+		return model.Repository{}, err
 	}
 
 	repositoryID, ok := query.Repository.ID.(string)
 	if !ok {
-		return Repository{}, fmt.Errorf("can't convert repository id to string: %v", query.Repository.ID)
+		return model.Repository{}, fmt.Errorf("can't convert repository id to string: %v", query.Repository.ID)
 	}
 
 	if len(query.Repository.Releases.Edges) == 0 {
-		return Repository{}, fmt.Errorf("can't find any releases for %s/%s", owner, name)
+		return model.Repository{}, fmt.Errorf("can't find any releases for %s/%s", owner, name)
 	}
 	latestRelease := query.Repository.Releases.Edges[0].Node
 
 	releaseID, ok := latestRelease.ID.(string)
 	if !ok {
-		return Repository{}, fmt.Errorf("can't convert release id to string: %v", query.Repository.ID)
+		return model.Repository{}, fmt.Errorf("can't convert release id to string: %v", query.Repository.ID)
 	}
 
-	return Repository{
+	return model.Repository{
 		ID:          repositoryID,
 		Name:        string(query.Repository.Name),
 		Owner:       owner,
 		Description: string(query.Repository.Description),
 		URL:         *query.Repository.URL.URL,
 
-		Release: Release{
+		Release: model.Release{
 			ID:           releaseID,
 			Name:         string(latestRelease.Name),
 			Description:  string(latestRelease.Description),
