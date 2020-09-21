@@ -17,7 +17,7 @@ import (
 )
 
 // Version of current build
-var Version = "devel"
+var version = "unknown"
 
 // Config of env and args
 type Config struct {
@@ -36,7 +36,7 @@ func (c Config) Token() *oauth2.Token {
 
 // Version prints version string
 func (Config) Version() string {
-	return "github-releases-notifier " + Version
+	return "github-releases-notifier " + version
 }
 
 func main() {
