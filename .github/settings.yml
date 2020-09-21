@@ -1,7 +1,7 @@
 repository:
   name: github-releases-notifier
   description: GitHub release notification bot
-  topics: drone, drone-plugin
+  topics: automation, bot, github, release
 
   private: false
   has_issues: true
