@@ -6,6 +6,7 @@ GitHub release notification bot
 [![Docker Hub](https://img.shields.io/badge/dockerhub-latest-blue.svg?logo=docker&logoColor=white)](https://hub.docker.com/r/thegeeklab/github-releases-notifier)
 [![Quay.io](https://img.shields.io/badge/quay-latest-blue.svg?logo=docker&logoColor=white)](https://quay.io/repository/thegeeklab/github-releases-notifier)
 [![Go Report Card](https://goreportcard.com/badge/github.com/thegeeklab/github-releases-notifier)](https://goreportcard.com/report/github.com/thegeeklab/github-releases-notifier)
+[![GitHub contributors](https://img.shields.io/github/contributors/thegeeklab/github-releases-notifier)](https://github.com/thegeeklab/github-releases-notifier/graphs/contributors)
 [![Source: GitHub](https://img.shields.io/badge/source-github-blue.svg?logo=github&logoColor=white)](https://github.com/thegeeklab/github-releases-notifier)
 [![License: MIT](https://img.shields.io/github/license/thegeeklab/github-releases-notifier)](<[LICENSE](https://github.com/thegeeklab/github-releases-notifier/blob/master/LICENSE)>)
 
@@ -26,3 +27,11 @@ docker run --rm \
     -e SLACK_HOOK=https://hooks.slack.com/... \
     thegeeklab/github-releases-notifier -r=kubernetes/kubernetes
 ```
+
+## Contributors
+
+Special thanks goes to all [contributors](https://github.com/thegeeklab/github-releases-notifier/graphs/contributors).
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](https://github.com/thegeeklab/github-releases-notifier/blob/master/LICENSE) file for details.
