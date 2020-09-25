@@ -8,7 +8,7 @@ GitHub release notification bot
 [![Go Report Card](https://goreportcard.com/badge/github.com/thegeeklab/github-releases-notifier)](https://goreportcard.com/report/github.com/thegeeklab/github-releases-notifier)
 [![GitHub contributors](https://img.shields.io/github/contributors/thegeeklab/github-releases-notifier)](https://github.com/thegeeklab/github-releases-notifier/graphs/contributors)
 [![Source: GitHub](https://img.shields.io/badge/source-github-blue.svg?logo=github&logoColor=white)](https://github.com/thegeeklab/github-releases-notifier)
-[![License: MIT](https://img.shields.io/github/license/thegeeklab/github-releases-notifier)](<[LICENSE](https://github.com/thegeeklab/github-releases-notifier/blob/master/LICENSE)>)
+[![License: MIT](https://img.shields.io/github/license/thegeeklab/github-releases-notifier)](https://github.com/thegeeklab/github-releases-notifier/blob/master/LICENSE)
 
 Receive Slack notifications if a new release of your favorite software is available on GitHub.
 
