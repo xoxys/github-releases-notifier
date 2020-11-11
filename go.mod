@@ -3,7 +3,7 @@ module github.com/thegeeklab/github-releases-notifier
 go 1.13
 
 require (
-	github.com/alexflint/go-arg v1.2.0
+	github.com/alexflint/go-arg v1.3.0
 	github.com/go-kit/kit v0.9.0
 	github.com/go-logfmt/logfmt v0.5.0 // indirect
 	github.com/go-stack/stack v1.8.0 // indirect
