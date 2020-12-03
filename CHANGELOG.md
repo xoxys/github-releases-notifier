@@ -1,3 +1,2 @@
-- INTERNAL
-  - publish to dockerhub and quay
-  - refactor project structure
+- ENHANCEMENT
+  - Update golang.org/x/oauth2 commit hash to 0b49973
