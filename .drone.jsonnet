@@ -9,7 +9,7 @@ local PipelineTest = {
   steps: [
     {
       name: 'staticcheck',
-      image: 'golang:1.14',
+      image: 'golang:1.15',
       commands: [
         'go run honnef.co/go/tools/cmd/staticcheck ./...',
       ],
@@ -22,7 +22,7 @@ local PipelineTest = {
     },
     {
       name: 'lint',
-      image: 'golang:1.14',
+      image: 'golang:1.15',
       commands: [
         'go run golang.org/x/lint/golint -set_exit_status ./...',
       ],
@@ -35,7 +35,7 @@ local PipelineTest = {
     },
     {
       name: 'vet',
-      image: 'golang:1.14',
+      image: 'golang:1.15',
       commands: [
         'go vet ./...',
       ],
@@ -48,7 +48,7 @@ local PipelineTest = {
     },
     {
       name: 'test',
-      image: 'golang:1.14',
+      image: 'golang:1.15',
       commands: [
         'go test -cover ./...',
       ],
@@ -83,7 +83,7 @@ local PipelineBuildBinaries = {
   steps: [
     {
       name: 'build',
-      image: 'techknowlogick/xgo:go-1.14.x',
+      image: 'techknowlogick/xgo:go-1.15.x',
       commands: [
         '[ -z "${DRONE_TAG}" ] && BUILD_VERSION=${DRONE_COMMIT_SHA:0:8} || BUILD_VERSION=${DRONE_TAG##v}',
         'mkdir -p release/',
@@ -152,7 +152,7 @@ local PipelineBuildContainer(arch='amd64') = {
   steps: [
     {
       name: 'build',
-      image: 'golang:1.14',
+      image: 'golang:1.15',
       commands: [
         '[ -z "${DRONE_TAG}" ] && BUILD_VERSION=${DRONE_COMMIT_SHA:0:8} || BUILD_VERSION=${DRONE_TAG##v}',
         'go build -v -ldflags "-X main.version=$BUILD_VERSION" -a -tags netgo -o release/' + arch + '/github-releases-notifier ./cmd/github-releases-notifier',

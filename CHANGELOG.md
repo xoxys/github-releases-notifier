@@ -1,2 +1,4 @@
 - ENHANCEMENT
   - Update github.com/shurcooL/githubv4 commit hash to 234843c
+- INTERNAL
+  - switch to go 1.15
