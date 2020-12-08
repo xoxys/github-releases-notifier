@@ -1,4 +1,2 @@
 - ENHANCEMENT
-  - Update github.com/shurcooL/githubv4 commit hash to 234843c
-- INTERNAL
-  - switch to go 1.15
+  - Update golang.org/x/oauth2 commit hash to 9317641
