@@ -1,2 +1,3 @@
 - ENHANCEMENT
   - Update golang.org/x/oauth2 commit hash to 08078c5
+  - Replace deprecated `org.label-schema` by `org.opencontainers` labels
